@@ -8,14 +8,14 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any others, from this software.
 
-(defproject com.7theta/idem "0.1.0"
+(defproject com.7theta/idem "0.1.1"
   :description "Library for working with IP Addresses"
   :url "https://github.com/7theta/idem"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [com.7theta/utilis "0.6.0"]
-                 [com.maxmind.geoip2/geoip2 "2.6.0"]
+                 [com.7theta/utilis "0.6.1"]
+                 [com.maxmind.geoip2/geoip2 "2.7.0"]
                  [com.stuartsierra/component "0.3.1"]]
   :profiles {:dev {:global-vars {*warn-on-reflection* true}
                    :dependencies [[reloaded.repl "0.2.1"]

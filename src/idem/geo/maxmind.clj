@@ -60,10 +60,12 @@
   of the database."
   ([locator ip] (locate locator ip nil))
   ([locator ip default]
-   (with-exception->value [Exception default]
-     (->> ip InetAddress/getByName
-          (.city ^DatabaseReader (:db-reader locator))
-          parse-response))))
+   (if-let [reader ^DatabaseReader (:db-reader locator)]
+     (with-exception->value [Exception default]
+       (->> ip InetAddress/getByName
+            (.city reader)
+            parse-response))
+     (throw (IllegalArgumentException. "Locator not started.")))))
 
 ;;; Implementation
 
