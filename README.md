@@ -1,5 +1,7 @@
 # com.7theta/idem
 [![Current Version](https://img.shields.io/clojars/v/com.7theta/idem.svg)](https://clojars.org/com.7theta/idem)
+[![GitHub license](https://img.shields.io/github/license/7theta/idem.svg)](LICENSE)
+[![Circle CI](https://circleci.com/gh/7theta/idem.svg?style=shield)](https://circleci.com/gh/7theta/idem)
 [![Dependencies Status](https://jarkeeper.com/7theta/idem/status.svg)](https://jarkeeper.com/7theta/idem)
 
 A library for working with IP addresses.
