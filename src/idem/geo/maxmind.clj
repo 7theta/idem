@@ -11,8 +11,8 @@
 (ns idem.geo.maxmind
   (:require [utilis.map :refer [compact]]
             [utilis.exception :refer [with-exception->value]]
-            [com.stuartsierra.component :as component]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [integrant.core :as ig])
   (:import  [java.net InetAddress]
             [com.maxmind.db CHMCache]
             [com.maxmind.geoip2 DatabaseReader DatabaseReader$Builder]
@@ -20,24 +20,14 @@
             [com.maxmind.geoip2.record Location City Subdivision Country
              Continent Traits]))
 
-;;; Types
-
-(defrecord MaxmindGeoIPLocator [db-file]
-  component/Lifecycle
-  (start [component]
-    (assoc component :db-reader (-> db-file io/file
-                                    DatabaseReader$Builder.
-                                    (.withCache (CHMCache.))
-                                    .build)))
-  (stop [component]
-    (dissoc component :db-reader))
-
-  java.io.Closeable
-  (close [component] (.stop component)))
-
 ;;; Public
 
-(defn maxmind-geo-ip-locator
+(declare ip-locator)
+
+(defmethod ig/init-key ::ip-locator [_ {:keys [db-file]}]
+  (ip-locator db-file))
+
+(defn ip-locator
   "Creates an instance of a locator that uses a Maxmind database to
   resolve the location of an IP Address. The locator works with both
   the Lite and the Commercial versions of the Maxmind database
@@ -46,7 +36,10 @@
   Maxmind databases can be obtained from:
     https://dev.maxmind.com/geoip/geoip2/downloadable/"
   [db-file]
-  (MaxmindGeoIPLocator. db-file))
+  (-> db-file io/file
+      DatabaseReader$Builder.
+      (.withCache (CHMCache.))
+      .build))
 
 (declare parse-response)
 
@@ -60,12 +53,12 @@
   of the database."
   ([locator ip] (locate locator ip nil))
   ([locator ip default]
-   (if-let [reader ^DatabaseReader (:db-reader locator)]
+   (if-let [reader ^DatabaseReader locator]
      (with-exception->value [Exception default]
        (->> ip InetAddress/getByName
             (.city reader)
             parse-response))
-     (throw (IllegalArgumentException. "Locator not started.")))))
+     (throw (IllegalArgumentException. "Locator is in an invalid state.")))))
 
 ;;; Implementation
 

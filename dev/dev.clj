@@ -11,11 +11,10 @@
 (ns dev
   "Tools for interactive development with the REPL. This file should
   not be included in a production build of the application."
-  (:require [idem.geo.maxmind :refer [maxmind-geo-ip-locator locate]]
+  (:require [idem.geo.maxmind :refer [locate]]
+            [integrant.core :as ig]
 
-            [reloaded.repl :refer [system init start stop go reset reset-all]]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
-            [com.stuartsierra.component :as component]
 
             [clojure.repl :refer [apropos dir doc find-doc pst source]]
             [clojure.reflect :refer [reflect]]
@@ -23,10 +22,17 @@
 
             [clojure.test :refer [run-tests run-all-tests]]))
 
-(defn dev-system
-  [config]
-  (component/system-map
-   :locator (maxmind-geo-ip-locator (:maxmind-db-file config))))
+(def config
+  {:idem.geo.maxmind/ip-locator {:db-file "LOCATION-OF-MAXMIND-DB-FILE"}})
 
-(reloaded.repl/set-init!
- #(dev-system {:maxmind-db-file "LOCATION-OF-MAXMIND-DB-FILE"}))
+(ig/load-namespaces config)
+
+(def system nil)
+
+(defn start []
+  (alter-var-root #'system
+                  (constantly (ig/init config))))
+
+(defn stop []
+  (ig/halt! system)
+  (alter-var-root #'system (constantly nil)))
